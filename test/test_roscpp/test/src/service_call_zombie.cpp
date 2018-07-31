@@ -65,7 +65,8 @@ main(int argc, char** argv)
   ros::init(argc, argv, "service_call");
   ros::NodeHandle nh;
 
-  sleep(10);
+  //sleep(10);
+  Sleep(10 * 1000);
 
   int ret = RUN_ALL_TESTS();
 

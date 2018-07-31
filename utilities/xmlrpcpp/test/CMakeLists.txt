@@ -8,6 +8,7 @@ if(CATKIN_ENABLE_TESTING)
   if(TARGET test_base64)
     target_link_libraries(test_base64 xmlrpcpp)
     set_target_properties(test_base64 PROPERTIES COMPILE_FLAGS -std=c++11)
+    set_target_properties(test_base64 PROPERTIES COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
   endif()
 
   # Some of the tests that follow use boost threads.
@@ -28,15 +29,18 @@ if(CATKIN_ENABLE_TESTING)
     target_link_libraries(test_dispatch_live xmlrpcpp test_fixtures ${Boost_LIBRARIES})
   endif()
 
+  if(NOT WIN32)
   catkin_add_gtest(test_ulimit test_ulimit.cpp)
   if(TARGET test_ulimit)
     target_link_libraries(test_ulimit xmlrpcpp test_fixtures ${Boost_LIBRARIES})
+  endif()
   endif()
 
   add_library(mock_socket mock_socket.cpp)
   target_link_libraries(mock_socket ${GTEST_LIBRARIES})
   set_target_properties(mock_socket PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
+if(NOT WIN32)
   catkin_add_gtest(test_client
     test_client.cpp
     ../src/XmlRpcClient.cpp
@@ -50,7 +54,9 @@ if(CATKIN_ENABLE_TESTING)
   if(TARGET target_link_libraries)
     target_link_libraries(test_client mock_socket ${catkin_LIBRARIES})
   endif()
+endif()
 
+if(NOT WIN32)
   catkin_add_gtest(test_dispatch
     test_dispatch.cpp
     ../src/XmlRpcDispatch.cpp
@@ -73,6 +79,7 @@ if(CATKIN_ENABLE_TESTING)
     )
     endif()
   endif()
+endif()
 
   if(NOT WIN32)
     catkin_add_gtest(test_socket

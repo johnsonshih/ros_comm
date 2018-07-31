@@ -35,7 +35,7 @@
 
 #include <gtest/gtest.h>
 #include "ros/poll_set.h"
-#include <sys/socket.h>
+//#include <sys/socket.h>
 
 #include <fcntl.h>
 
@@ -59,7 +59,8 @@ public:
 
   void waitThenSignal()
   {
-    usleep(100000);
+    //usleep(100000);
+    Sleep(100);
 
     poll_set_.signal();
   }
@@ -68,6 +69,7 @@ protected:
 
   virtual void SetUp()
   {
+#if 0
     if(socketpair(AF_UNIX, SOCK_STREAM, 0, sockets_) != 0)
     {
       FAIL();
@@ -80,6 +82,7 @@ protected:
     {
       FAIL();
     }
+#endif
   }
 
   PollSet poll_set_;
@@ -390,7 +393,8 @@ TEST_F(Poller, signal)
   poll_set_.update(-1);
 
   // wait for poll_set_.signal_mutex_ to be unlocked after invoking signal()
-  usleep(50000);
+  //usleep(50000);
+  Sleep(50);
 }
 
 
@@ -398,7 +402,7 @@ int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
 
-  signal(SIGPIPE, SIG_IGN);
+  //signal(SIGPIPE, SIG_IGN);
 
   return RUN_ALL_TESTS();
 }

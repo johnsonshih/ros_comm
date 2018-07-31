@@ -34,7 +34,7 @@
 
 using namespace XmlRpc;
 
-bool XmlRpcSocket::s_use_ipv6_ = false;
+//bool XmlRpcSocket::s_use_ipv6_ = false;
 
 // Returns message corresponding to last errno.
 // NOTE(austin): this matches the default implementation.
