@@ -417,7 +417,9 @@ int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
 
-  //signal(SIGPIPE, SIG_IGN);
+#ifndef _WIN32
+  signal(SIGPIPE, SIG_IGN);
+#endif
 
   return RUN_ALL_TESTS();
 }

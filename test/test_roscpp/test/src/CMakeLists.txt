@@ -81,11 +81,10 @@ add_dependencies(${PROJECT_NAME}-service_deadlock ${std_srvs_EXPORTED_TARGETS})
 add_executable(${PROJECT_NAME}-service_call_repeatedly EXCLUDE_FROM_ALL service_call_repeatedly.cpp)
 target_link_libraries(${PROJECT_NAME}-service_call_repeatedly ${catkin_LIBRARIES})
 
-if(NOT WIN32)
+find_library(LOG4CXX_LIBRARIES log4cxx)
 add_executable(${PROJECT_NAME}-service_exception EXCLUDE_FROM_ALL service_exception.cpp)
-target_link_libraries(${PROJECT_NAME}-service_exception ${GTEST_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}-service_exception ${GTEST_LIBRARIES} ${LOG4CXX_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME}-service_exception ${std_srvs_EXPORTED_TARGETS})
-endif()
 
 # Repeatedly call ros::init()
 add_executable(${PROJECT_NAME}-multiple_init_fini EXCLUDE_FROM_ALL multiple_init_fini.cpp)
@@ -244,7 +243,7 @@ if(TARGET tests)
     ${PROJECT_NAME}-service_call
     ${PROJECT_NAME}-service_call_zombie
     ${PROJECT_NAME}-service_deadlock
-#    ${PROJECT_NAME}-service_exception
+    ${PROJECT_NAME}-service_exception
     ${PROJECT_NAME}-service_call_repeatedly
     ${PROJECT_NAME}-multiple_init_fini
     ${PROJECT_NAME}-inspection
@@ -310,7 +309,7 @@ add_dependencies(${PROJECT_NAME}-service_adv_unadv ${${PROJECT_NAME}_EXPORTED_TA
 add_dependencies(${PROJECT_NAME}-service_call ${${PROJECT_NAME}_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME}-service_call_zombie ${${PROJECT_NAME}_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME}-service_deadlock ${${PROJECT_NAME}_EXPORTED_TARGETS})
-#add_dependencies(${PROJECT_NAME}-service_exception ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}-service_exception ${${PROJECT_NAME}_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME}-service_call_repeatedly ${${PROJECT_NAME}_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME}-multiple_init_fini ${${PROJECT_NAME}_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME}-inspection ${${PROJECT_NAME}_EXPORTED_TARGETS})

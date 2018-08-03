@@ -53,8 +53,12 @@ int main(int argc, char** argv)
 	for(int i = 0; i < 10; ++i)
 	{
 		ros::spinOnce();
-		//usleep(100*1000);
-		Sleep(1000);
+
+#ifndef _WIN32
+		usleep(100*1000);
+#else
+		Sleep(100);
+#endif
 	}
 
 	// Exit immediately without calling any atexit hooks
