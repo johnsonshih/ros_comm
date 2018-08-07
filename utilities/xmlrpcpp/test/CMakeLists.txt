@@ -28,55 +28,57 @@ if(TARGET test_dispatch_live)
   target_link_libraries(test_dispatch_live xmlrpcpp test_fixtures ${Boost_LIBRARIES})
 endif()
 
-if(NOT WIN32)
-  catkin_add_gtest(test_ulimit test_ulimit.cpp)
-  if(TARGET test_ulimit)
-    target_link_libraries(test_ulimit xmlrpcpp test_fixtures ${Boost_LIBRARIES})
-  endif()
+catkin_add_gtest(test_ulimit test_ulimit.cpp)
+if(TARGET test_ulimit)
+  target_link_libraries(test_ulimit xmlrpcpp test_fixtures ${Boost_LIBRARIES})
 endif()
 
 add_library(mock_socket mock_socket.cpp)
 target_link_libraries(mock_socket ${GTEST_LIBRARIES})
 set_target_properties(mock_socket PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-if(NOT WIN32)
-  catkin_add_gtest(test_client
-    test_client.cpp
-    ../src/XmlRpcClient.cpp
-    ../src/XmlRpcValue.cpp
-    ../src/XmlRpcUtil.cpp
-    ../src/XmlRpcDispatch.cpp
-    ../src/XmlRpcSource.cpp
-    ../libb64/src/cdecode.c
-    ../libb64/src/cencode.c
-  )
-  if(TARGET test_client)
-    target_link_libraries(test_client mock_socket ${catkin_LIBRARIES})
+catkin_add_gtest(test_client
+  test_client.cpp
+  ../src/XmlRpcClient.cpp
+  ../src/XmlRpcValue.cpp
+  ../src/XmlRpcUtil.cpp
+  ../src/XmlRpcDispatch.cpp
+  ../src/XmlRpcSource.cpp
+  ../libb64/src/cdecode.c
+  ../libb64/src/cencode.c
+)
+if(TARGET test_client)
+  set_target_properties(test_client PROPERTIES COMPILE_FLAGS -UROS_BUILD_SHARED_LIBS)
+  target_link_libraries(test_client mock_socket ${catkin_LIBRARIES})
+  if(WIN32)
+    target_link_libraries(test_client ws2_32)
   endif()
 endif()
 
-if(NOT WIN32)
-  catkin_add_gtest(test_dispatch
-    test_dispatch.cpp
-    ../src/XmlRpcDispatch.cpp
-    ../src/XmlRpcSource.cpp
-    ../src/XmlRpcUtil.cpp
-    ../libb64/src/cdecode.c
-    ../libb64/src/cencode.c
-  )
-  if(TARGET test_dispatch)
-    target_link_libraries(test_dispatch mock_socket ${catkin_LIBRARIES})
-    if(APPLE)
-      set_target_properties(test_dispatch PROPERTIES
-        LINK_FLAGS
-        "-Wl,-alias,___wrap_poll,_poll"
-      )
-    elseif(UNIX)
-      set_target_properties(test_dispatch PROPERTIES
-        LINK_FLAGS
-        "-Wl,--wrap=poll"
-      )
-    endif()
+catkin_add_gtest(test_dispatch
+  test_dispatch.cpp
+  ../src/XmlRpcDispatch.cpp
+  ../src/XmlRpcSource.cpp
+  ../src/XmlRpcUtil.cpp
+  ../libb64/src/cdecode.c
+  ../libb64/src/cencode.c
+)
+if(TARGET test_dispatch)
+  set_target_properties(test_dispatch PROPERTIES COMPILE_FLAGS -UROS_BUILD_SHARED_LIBS)
+  target_link_libraries(test_dispatch mock_socket ${catkin_LIBRARIES})
+  if(WIN32)
+    target_link_libraries(test_dispatch ws2_32)
+  endif()
+  if(APPLE)
+    set_target_properties(test_dispatch PROPERTIES
+      LINK_FLAGS
+      "-Wl,-alias,___wrap_poll,_poll"
+    )
+  elseif(UNIX)
+    set_target_properties(test_dispatch PROPERTIES
+      LINK_FLAGS
+      "-Wl,--wrap=poll"
+    )
   endif()
 endif()
 
@@ -105,9 +107,11 @@ if(TARGET TestValues)
   target_link_libraries(TestValues xmlrpcpp)
 endif()
 
-catkin_add_gtest(test_util test_util.cpp)
+catkin_add_gtest(test_util
+  test_util.cpp
+  ../src/XmlRpcUtil.cpp)
 if(TARGET test_util)
-  target_link_libraries(test_util xmlrpcpp)
+  set_target_properties(test_util PROPERTIES COMPILE_FLAGS -UROS_BUILD_SHARED_LIBS)
 endif()
 
 catkin_add_gtest(TestXml TestXml.cpp)

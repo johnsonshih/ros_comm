@@ -26,7 +26,7 @@
 namespace XmlRpc {
 
   //! An interface allowing custom handling of error message reporting.
-  class XMLRPCPP_DECL XmlRpcErrorHandler {
+  class XmlRpcErrorHandler {
   public:
     virtual ~XmlRpcErrorHandler() { }
 
@@ -46,7 +46,7 @@ namespace XmlRpc {
   };
 
   //! An interface allowing custom handling of informational message reporting.
-  class XMLRPCPP_DECL XmlRpcLogHandler {
+  class XmlRpcLogHandler {
   public:
     virtual ~XmlRpcLogHandler() { }
 
