@@ -77,8 +77,6 @@ namespace XmlRpc {
     // Possible IO states for the connection
     enum ClientConnectionState { NO_CONNECTION, CONNECTING, WRITE_REQUEST, READ_HEADER, READ_RESPONSE, IDLE };
 
-    static const char * connectionStateStr(ClientConnectionState state);
-
   protected:
     // Execution processing helpers
     virtual bool doConnect();
@@ -92,6 +90,8 @@ namespace XmlRpc {
     virtual bool parseResponse(XmlRpcValue& result);
 
     ClientConnectionState _connectionState;
+
+    static const char * connectionStateStr(ClientConnectionState state);
 
     // Server location
     std::string _host;

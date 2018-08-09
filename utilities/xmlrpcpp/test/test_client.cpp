@@ -50,11 +50,12 @@ public:
   using XmlRpcClient::parseResponse;
 
   using XmlRpcClient::_connectionState;
+  using XmlRpcClient::connectionStateStr;
 };
 namespace XmlRpc {
 void PrintTo(const XmlRpcClient::ClientConnectionState& state,
              ::std::ostream* os) {
-  *os << XmlRpcClient::connectionStateStr(state);
+  *os << XmlRpcClientForTest::connectionStateStr(state);
 }
 }; // namespace XmlRpc
 
@@ -75,7 +76,7 @@ bool sourceInList(XmlRpc::XmlRpcSource* source,
 // Test connectionStateStr macro
 TEST(XmlRpcClient, connectionStateStr) {
 #define TEST_STATE(state)                                                      \
-  EXPECT_STREQ(#state, XmlRpcClient::connectionStateStr(XmlRpcClient::state))
+  EXPECT_STREQ(#state, XmlRpcClientForTest::connectionStateStr(XmlRpcClient::state))
   TEST_STATE(NO_CONNECTION);
   TEST_STATE(CONNECTING);
   TEST_STATE(WRITE_REQUEST);
