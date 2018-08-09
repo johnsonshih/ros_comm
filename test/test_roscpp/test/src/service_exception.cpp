@@ -7,7 +7,7 @@
 #include <log4cxx/appenderskeleton.h>
 #ifdef _MSC_VER
   // Have to be able to encode wchar LogStrings on windows.
-  #include <log4cxx/helpers/transcoder.h>
+# include <log4cxx/helpers/transcoder.h>
 #endif
 #include <ros/console.h>
 #include <ros/poll_manager.h>
