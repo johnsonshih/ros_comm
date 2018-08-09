@@ -35,7 +35,9 @@
 
 #include <gtest/gtest.h>
 #include "ros/poll_set.h"
-//#include <sys/socket.h>
+#ifndef _WIN32
+# include <sys/socket.h>
+#endif
 
 #include <fcntl.h>
 
@@ -44,133 +46,119 @@
 
 using namespace ros;
 
-int set_non_blocking1(int &socket) {
-#ifdef WIN32
-	u_long non_blocking = 1;
-	if (ioctlsocket(socket, FIONBIO, &non_blocking) != 0)
-	{
-		return WSAGetLastError();
-	}
+int set_nonblocking(int &socket)
+{
+#ifndef _WIN32
+  if (fcntl(socket, F_SETFL, O_NONBLOCK) == -1)
+  {
+    return errno;
+  }
 #else
-	if (fcntl(socket, F_SETFL, O_NONBLOCK) == -1)
-	{
-		return errno;
-	}
+  u_long non_blocking = 1;
+  if (ioctlsocket(socket, FIONBIO, &non_blocking) != 0)
+  {
+    return WSAGetLastError();
+  }
 #endif
-	return 0;
+  return 0;
 }
 
-int create_signal_pair1(int signal_pair[2]) {
-#ifdef WIN32 // use a socket pair
-	signal_pair[0] = INVALID_SOCKET;
-	signal_pair[1] = INVALID_SOCKET;
+int create_socket_pair(int socket_pair[2])
+{
+#ifndef _WIN32
+  return socketpair(AF_UNIX, SOCK_STREAM, 0, socket_pair);
+#else
+  socket_pair[0] = INVALID_SOCKET;
+  socket_pair[1] = INVALID_SOCKET;
 
-	union {
-		struct sockaddr_in inaddr;
-		struct sockaddr addr;
-	} a;
-	socklen_t addrlen = sizeof(a.inaddr);
+  /*********************
+  ** Listen Socket
+  **********************/
+  socket_fd_t listen_socket = INVALID_SOCKET;
+  listen_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  if (listen_socket == INVALID_SOCKET)
+  {
+    return WSAGetLastError();
+  }
 
-	/*********************
-	** Listen Socket
-	**********************/
-	socket_fd_t listen_socket = INVALID_SOCKET;
-	listen_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (listen_socket == INVALID_SOCKET) {
-		return -1;
-	}
+  // allow it to be bound to an address already in use - do we actually need this?
+  int reuse = 1;
+  if (setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&reuse), static_cast<socklen_t>(sizeof(reuse))) == SOCKET_ERROR)
+  {
+    ::closesocket(listen_socket);
+    return WSAGetLastError();
+  }
 
-	// allow it to be bound to an address already in use - do we actually need this?
-	int reuse = 1;
-	if (setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, (socklen_t) sizeof(reuse)) == SOCKET_ERROR) {
-		::closesocket(listen_socket);
-		return -1;
-	}
+  union
+  {
+    struct sockaddr_in inaddr;
+    struct sockaddr addr;
+  } a;
 
-	memset(&a, 0, sizeof(a));
-	a.inaddr.sin_family = AF_INET;
-	a.inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	// For TCP/IP, if the port is specified as zero, the service provider assigns
-	// a unique port to the application from the dynamic client port range.
-	a.inaddr.sin_port = 0;
+  memset(&a, 0, sizeof(a));
+  a.inaddr.sin_family = AF_INET;
+  a.inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  // For TCP/IP, if the port is specified as zero, the service provider assigns
+  // a unique port to the application from the dynamic client port range.
+  a.inaddr.sin_port = 0;
 
-	if (bind(listen_socket, &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR) {
-		::closesocket(listen_socket);
-		return -1;
-	}
-	// we need this below because the system auto filled in some entries, e.g. port #
-	if (getsockname(listen_socket, &a.addr, &addrlen) == SOCKET_ERROR) {
-		::closesocket(listen_socket);
-		return -1;
-	}
-	// max 1 connection permitted
-	if (listen(listen_socket, 1) == SOCKET_ERROR) {
-		::closesocket(listen_socket);
-		return -1;
-	}
+  if (bind(listen_socket, &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
+  {
+    ::closesocket(listen_socket);
+    return WSAGetLastError();
+  }
 
-	/*********************
-	** Connection
-	**********************/
-	// do we need io overlapping?
-	// DWORD flags = (make_overlapped ? WSA_FLAG_OVERLAPPED : 0);
-	DWORD overlapped_flag = 0;
-	signal_pair[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, overlapped_flag);
-	if (signal_pair[0] == INVALID_SOCKET) {
-		::closesocket(listen_socket);
-		::closesocket(signal_pair[0]);
-		return -1;
-	}
-	// reusing the information from above to connect to the listener
-	if (connect(signal_pair[0], &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR) {
-		::closesocket(listen_socket);
-		::closesocket(signal_pair[0]);
-		return -1;
-	}
-	/*********************
-	** Accept
-	**********************/
-	signal_pair[1] = accept(listen_socket, NULL, NULL);
-	if (signal_pair[1] == INVALID_SOCKET) {
-		::closesocket(listen_socket);
-		::closesocket(signal_pair[0]);
-		::closesocket(signal_pair[1]);
-		return -1;
-	}
-	/*********************
-	** Nonblocking
-	**********************/
-	// should we do this or should we set io overlapping?
-	if ((set_non_blocking1(signal_pair[0]) != 0) || (set_non_blocking1(signal_pair[1]) != 0)) {
-		::closesocket(listen_socket);
-		::closesocket(signal_pair[0]);
-		::closesocket(signal_pair[1]);
-		return -1;
-	}
-	/*********************
-	** Cleanup
-	**********************/
-	::closesocket(listen_socket);  // the listener has done its job.
-	return 0;
-#else // use a pipe pair
-	// initialize
-	signal_pair[0] = -1;
-	signal_pair[1] = -1;
+  // we need this below because the system auto filled in some entries, e.g. port #
+  socklen_t addrlen = static_cast<socklen_t>(sizeof(a.inaddr));
+  if (getsockname(listen_socket, &a.addr, &addrlen) == SOCKET_ERROR)
+  {
+    ::closesocket(listen_socket);
+    return WSAGetLastError();
+  }
+  // max 1 connection permitted
+  if (listen(listen_socket, 1) == SOCKET_ERROR)
+  {
+    ::closesocket(listen_socket);
+    return WSAGetLastError();
+  }
 
-	if (pipe(signal_pair) != 0) {
-		ROS_FATAL("pipe() failed");
-		return -1;
-	}
-	if (fcntl(signal_pair[0], F_SETFL, O_NONBLOCK) == -1) {
-		ROS_FATAL("fcntl() failed");
-		return -1;
-	}
-	if (fcntl(signal_pair[1], F_SETFL, O_NONBLOCK) == -1) {
-		ROS_FATAL("fcntl() failed");
-		return -1;
-	}
-	return 0;
-#endif // create_pipe
+  /*********************
+  ** Connection
+  **********************/
+  DWORD overlapped_flag = 0;
+  socket_pair[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, overlapped_flag);
+  if (socket_pair[0] == INVALID_SOCKET)
+  {
+    ::closesocket(listen_socket);
+    ::closesocket(socket_pair[0]);
+    return WSAGetLastError();
+  }
+
+  // reusing the information from above to connect to the listener
+  if (connect(socket_pair[0], &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
+  {
+    ::closesocket(listen_socket);
+    ::closesocket(socket_pair[0]);
+    return WSAGetLastError();
+  }
+
+  /*********************
+  ** Accept
+  **********************/
+  socket_pair[1] = accept(listen_socket, NULL, NULL);
+  if (socket_pair[1] == INVALID_SOCKET)
+  {
+    ::closesocket(listen_socket);
+    ::closesocket(socket_pair[0]);
+    return WSAGetLastError();
+  }
+
+  /*********************
+  ** Cleanup
+  **********************/
+  ::closesocket(listen_socket);  // the listener has done its job.
+  return 0;
+#endif
 }
 
 class Poller : public testing::Test
@@ -178,12 +166,20 @@ class Poller : public testing::Test
 public:
   Poller()
   {
+#ifdef _WIN32
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2, 0), &wsaData);
+#endif    
   }
 
   ~Poller()
   {
     ::close(sockets_[0]);
     ::close(sockets_[1]);
+
+#ifdef _WIN32
+    WSACleanup();
+#endif    
   }
 
   void waitThenSignal()
@@ -197,25 +193,18 @@ protected:
 
   virtual void SetUp()
   {
-#ifndef _WIN32
-    if(socketpair(AF_UNIX, SOCK_STREAM, 0, sockets_) != 0)
+    if (create_socket_pair(sockets_) != 0)
     {
       FAIL();
     }
-    if(fcntl(sockets_[0], F_SETFL, O_NONBLOCK) == -1)
+    if(set_nonblocking(sockets_[0]) != 0)
     {
       FAIL();
     }
-    if(fcntl(sockets_[1], F_SETFL, O_NONBLOCK) == -1)
+    if(set_nonblocking(sockets_[1]) != 0)
     {
       FAIL();
     }
-#else
-    if (create_signal_pair1(sockets_))
-    {
-      FAIL();
-    }
-#endif
   }
 
   PollSet poll_set_;
