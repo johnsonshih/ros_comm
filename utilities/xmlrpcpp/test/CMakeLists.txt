@@ -107,11 +107,9 @@ if(TARGET TestValues)
   target_link_libraries(TestValues xmlrpcpp)
 endif()
 
-catkin_add_gtest(test_util
-  test_util.cpp
-  ../src/XmlRpcUtil.cpp)
+catkin_add_gtest(test_util test_util.cpp)
 if(TARGET test_util)
-  set_target_properties(test_util PROPERTIES COMPILE_FLAGS -UROS_BUILD_SHARED_LIBS)
+  target_link_libraries(test_util xmlrpcpp)
 endif()
 
 catkin_add_gtest(TestXml TestXml.cpp)
