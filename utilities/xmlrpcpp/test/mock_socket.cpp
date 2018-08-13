@@ -20,8 +20,9 @@
  * Author: Austin Hendrix <austin@zoox.com>
  *
  */
+
 #define xmlrpcpp_EXPORTS  // we are mocking XmlRpcSocket, define the symbol in order to export XmlRpcSocket class
-#include "xmlrpcpp/XmlRpcSocket.h"
+# include "xmlrpcpp/XmlRpcSocket.h"
 #undef xmlrpcpp_EXPORTS
 
 #include "xmlrpcpp/XmlRpcUtil.h"
