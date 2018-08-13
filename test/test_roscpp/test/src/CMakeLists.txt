@@ -81,9 +81,8 @@ add_dependencies(${PROJECT_NAME}-service_deadlock ${std_srvs_EXPORTED_TARGETS})
 add_executable(${PROJECT_NAME}-service_call_repeatedly EXCLUDE_FROM_ALL service_call_repeatedly.cpp)
 target_link_libraries(${PROJECT_NAME}-service_call_repeatedly ${catkin_LIBRARIES})
 
-find_library(LOG4CXX_LIBRARIES log4cxx)
 add_executable(${PROJECT_NAME}-service_exception EXCLUDE_FROM_ALL service_exception.cpp)
-target_link_libraries(${PROJECT_NAME}-service_exception ${GTEST_LIBRARIES} ${LOG4CXX_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}-service_exception ${GTEST_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME}-service_exception ${std_srvs_EXPORTED_TARGETS})
 
 # Repeatedly call ros::init()

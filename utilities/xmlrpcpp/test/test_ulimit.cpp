@@ -24,7 +24,7 @@
 #include "test_fixtures.h"
 
 #ifndef _WIN32
-#include <sys/resource.h>
+# include <sys/resource.h>
 #endif
 
 using namespace XmlRpc;
