@@ -23,12 +23,23 @@
 
 #include "xmlrpcpp/XmlRpc.h"
 
+#include <ros/macros.h>
+#ifdef ROS_BUILD_SHARED_LIBS // ros is being built around shared libraries
+  #ifdef test_fixtures_EXPORTS // we are building a shared lib/dll
+    #define TEST_FIXTURES_DECL ROS_HELPER_EXPORT
+  #else // we are using shared lib/dll
+    #define TEST_FIXTURES_DECL ROS_HELPER_IMPORT
+  #endif
+#else // ros is being built around static libraries
+  #define TEST_FIXTURES_DECL
+#endif
+
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <gtest/gtest.h>
 
 // No arguments, result is "Hello".
-class Hello : public XmlRpc::XmlRpcServerMethod
+class TEST_FIXTURES_DECL Hello : public XmlRpc::XmlRpcServerMethod
 {
 public:
   Hello(XmlRpc::XmlRpcServer* s) : XmlRpc::XmlRpcServerMethod("Hello", s) {}
@@ -40,7 +51,7 @@ public:
   boost::mutex hello_mutex;
 };
 
-class XmlRpcTest : public ::testing::Test
+class TEST_FIXTURES_DECL XmlRpcTest : public ::testing::Test
 {
 protected:
   XmlRpcTest();

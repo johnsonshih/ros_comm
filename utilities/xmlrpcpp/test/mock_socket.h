@@ -22,10 +22,23 @@
  */
 
 #pragma once
+
+#include <ros/macros.h>
+
+#ifdef ROS_BUILD_SHARED_LIBS // ros is being built around shared libraries
+  #ifdef mock_socket_EXPORTS // we are building a shared lib/dll
+    #define MOCK_SOCKET_DECL ROS_HELPER_EXPORT
+  #else // we are using shared lib/dll
+    #define MOCK_SOCKET_DECL ROS_HELPER_IMPORT
+  #endif
+#else // ros is being built around static libraries
+  #define MOCK_SOCKET_DECL
+#endif
+
 #include <string>
 #include <gtest/gtest.h>
 
-class MockSocketTest : public ::testing::Test {
+class MOCK_SOCKET_DECL MockSocketTest : public ::testing::Test {
 protected:
   void SetUp();
 
