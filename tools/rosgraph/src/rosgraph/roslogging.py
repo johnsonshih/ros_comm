@@ -57,10 +57,8 @@ class RospyLogger(logging.getLoggerClass()):
         file_name, lineno, func_name = super(RospyLogger, self).findCaller()[:3]
 
         f = inspect.currentframe()
-        if f is not None:
+        if f is not None and f.f_back is not None:
             f = f.f_back
-        else:
-            return file_name, lineno, func_name
 
         while hasattr(f, "f_code"):
             if f.f_back is None:
