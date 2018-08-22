@@ -6,14 +6,14 @@ endif()
 catkin_add_gtest(test_base64 test_base64.cpp)
 if(TARGET test_base64)
   target_link_libraries(test_base64 xmlrpcpp)
-endif()
 
-set_target_properties(test_base64 PROPERTIES COMPILE_FLAGS -std=c++11)
-if(WIN32)
-  # On Windows, gtest can be built as shared (dll) or static (lib),
-  # to simplify the problem, here we require to match BUILD_SHARED_LIBS we used
-  if(BUILD_SHARED_LIBS)
-    set_target_properties(test_base64 PROPERTIES COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
+  set_target_properties(test_base64 PROPERTIES COMPILE_FLAGS -std=c++11)
+  if(WIN32)
+    # On Windows, gtest can be built as shared (dll) or static (lib),
+    # to simplify the problem, here we require to match BUILD_SHARED_LIBS we used
+    if(BUILD_SHARED_LIBS)
+      set_target_properties(test_base64 PROPERTIES COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
+    endif()
   endif()
 endif()
 
@@ -54,14 +54,11 @@ catkin_add_gtest(test_client
   ../libb64/src/cdecode.c
   ../libb64/src/cencode.c
 )
-if(WIN32)
-  # build everything from source, undefine ROS_BUILD_SHARED_LIBS to eliminate the dllimport/dllexport attributes
-  set_target_properties(test_client PROPERTIES COMPILE_FLAGS -UROS_BUILD_SHARED_LIBS)
-endif()
-
 if(TARGET test_client)
   target_link_libraries(test_client mock_socket ${catkin_LIBRARIES})
   if(WIN32)
+    # build everything from source, undefine ROS_BUILD_SHARED_LIBS to eliminate the dllimport/dllexport attributes
+    set_target_properties(test_client PROPERTIES COMPILE_FLAGS -UROS_BUILD_SHARED_LIBS)
     target_link_libraries(test_client ws2_32)
   endif()
 endif()
@@ -74,14 +71,11 @@ catkin_add_gtest(test_dispatch
   ../libb64/src/cdecode.c
   ../libb64/src/cencode.c
 )
-if(WIN32)
-  # build everything from source, undefine ROS_BUILD_SHARED_LIBS to eliminate the dllimport/dllexport attributes
-  set_target_properties(test_dispatch PROPERTIES COMPILE_FLAGS -UROS_BUILD_SHARED_LIBS)
-endif()
-
 if(TARGET test_dispatch)
   target_link_libraries(test_dispatch mock_socket ${catkin_LIBRARIES})
   if(WIN32)
+    # build everything from source, undefine ROS_BUILD_SHARED_LIBS to eliminate the dllimport/dllexport attributes
+    set_target_properties(test_dispatch PROPERTIES COMPILE_FLAGS -UROS_BUILD_SHARED_LIBS)
     target_link_libraries(test_dispatch ws2_32)
   endif()
 
