@@ -43,6 +43,7 @@
 #include <test_roscpp/TestStringString.h>
 
 #include <stdio.h>
+#include <boost/thread.hpp>
 
 TEST(SrvCall, callPhantomService)
 {
@@ -65,7 +66,7 @@ main(int argc, char** argv)
   ros::init(argc, argv, "service_call");
   ros::NodeHandle nh;
 
-  sleep(10);
+  boost::this_thread::sleep(boost::posix_time::seconds(10));
 
   int ret = RUN_ALL_TESTS();
 

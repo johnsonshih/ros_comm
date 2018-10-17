@@ -22,6 +22,14 @@ install(DIRECTORY resources
 catkin_install_python(PROGRAMS scripts/roslaunch-check
   DESTINATION  ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts)
 
+if (WIN32)
+  add_windows_python_exe_helper(roscore)
+  add_windows_python_exe_helper(roslaunch)
+  add_windows_python_exe_helper(roslaunch-complete)
+  add_windows_python_exe_helper(roslaunch-deps)
+  add_windows_python_exe_helper(roslaunch-logs)
+endif()
+
 if(CATKIN_ENABLE_TESTING)
   catkin_add_nosetests(test/unit)
 endif()

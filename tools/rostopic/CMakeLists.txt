@@ -8,6 +8,10 @@ catkin_python_setup()
 catkin_install_python(PROGRAMS scripts/rostopic
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+if (WIN32)
+  add_windows_python_exe_helper(rostopic)
+endif()
+
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest)
   add_rostest(test/rostopic.test)

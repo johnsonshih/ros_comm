@@ -119,7 +119,7 @@ def test_resolve_args():
         ('$(optenv NOT_ROS_ROOT)more stuff', 'more stuff'),
         ('$(optenv NOT_ROS_ROOT alternate)', 'alternate'),
         ('$(optenv NOT_ROS_ROOT alternate text)', 'alternate text'),
-        ('$(dirname)/foo', '/path/to/foo'),
+        ('$(dirname)/foo', os.path.abspath('/path/to') + '/foo'),
 
         # #1776
         ('$(anon foo)', 'bar'),

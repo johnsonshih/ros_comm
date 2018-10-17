@@ -166,6 +166,11 @@ class TestRoslaunchChild(unittest.TestCase):
             c.run()
         finally:
             server.shutdown('test done')
+            # the parent server will add handlers to the print log handler list
+            # clear the handler lists after testing so it won't impact other tests
+            from roslaunch.core import clear_printlog_handlers, clear_printerrlog_handlers
+            clear_printlog_handlers()
+            clear_printerrlog_handlers()
 
         # one final test for code completness: raise an exception during run()
         c = ROSLaunchChild(self.run_id, name, server_uri)

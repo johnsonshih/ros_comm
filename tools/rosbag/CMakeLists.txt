@@ -74,6 +74,10 @@ catkin_install_python(PROGRAMS
   scripts/topic_renamer.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+if (WIN32)
+  add_windows_python_exe_helper(rosbag)
+endif()
+
 if(CATKIN_ENABLE_TESTING)
   catkin_add_nosetests(test)
 endif()

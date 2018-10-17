@@ -19,6 +19,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h")
 
+if (WIN32)
+  add_windows_python_exe_helper(rostest)
+endif()
+
 if(CATKIN_ENABLE_TESTING)
   find_package(catkin COMPONENTS rostest)
 

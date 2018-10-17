@@ -41,6 +41,11 @@ import os
 from copy import deepcopy
 
 import yaml
+resource_retriever = None
+try:
+    import resource_retriever
+except ImportError:
+    pass
 
 from roslaunch.core import Param, RosbinExecutable, RLException, PHASE_SETUP
 
@@ -381,6 +386,10 @@ class Loader(object):
         @type  text: str
         @raise ValueError: if parameters cannot be processed into valid rosparam setting
         """
+        if file_ is not None:
+            if resource_retriever:
+                file_ = resource_retriever.get_filename(file_, False)
+
         if not cmd in ('load', 'dump', 'delete'):
             raise ValueError("command must be 'load', 'dump', or 'delete'")
         if file_ is not None:
@@ -491,7 +500,9 @@ class Loader(object):
                 print("... executing command param [%s]" % command)
             import subprocess, shlex #shlex rocks
             try:
-                p = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
+                if os.name == "posix":
+                    command = shlex.split(command)
+                p = subprocess.Popen(command, stdout=subprocess.PIPE)
                 c_value = p.communicate()[0]
                 if not isinstance(c_value, str):
                     c_value = c_value.decode('utf-8')

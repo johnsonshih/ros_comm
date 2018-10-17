@@ -12,3 +12,7 @@ catkin_install_python(PROGRAMS
   rosbuild/scripts/gensrv_py.py
   rosbuild/scripts/genutil.py
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/rosbuild/scripts)
+
+if (WIN32)
+  add_windows_python_exe_helper(rosconsole)
+endif()

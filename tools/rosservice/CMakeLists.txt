@@ -7,3 +7,7 @@ catkin_python_setup()
 
 catkin_install_python(PROGRAMS scripts/rosservice
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+if (WIN32)
+  add_windows_python_exe_helper(rosservice)
+endif()

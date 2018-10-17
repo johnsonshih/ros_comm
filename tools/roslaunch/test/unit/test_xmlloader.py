@@ -1086,4 +1086,4 @@ class TestXmlLoader(unittest.TestCase):
             param_d[p.key] = p.value
 
         self.assertEquals(param_d['/foo'], self.xml_dir + '/bar')
-        self.assertEquals(param_d['/bar'], self.xml_dir + '/test-dirname/baz')
+        self.assertEquals(param_d['/bar'], os.path.abspath(os.path.join(self.xml_dir, 'test-dirname')) + '/baz')

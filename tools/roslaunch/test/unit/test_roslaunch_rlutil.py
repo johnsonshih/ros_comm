@@ -74,7 +74,7 @@ class TestRoslaunchRlutil(unittest.TestCase):
         for test, result in tests:
             for v1, v2 in zip(result, resolve_launch_arguments(test)):
                 # workaround for nfs 
-                if os.path.exists(v1):
+                if os.path.exists(v1) and hasattr(os.path, 'samefile'):
                     self.assert_(os.path.samefile(v1, v2))
                 else:
                     self.assertEquals(v1, v2)
